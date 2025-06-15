@@ -1,6 +1,6 @@
 import { VectorStoreOperations } from "./vectorStore";
 
-async function queryStore(query: string):Promise<Document[]> {
+async function queryStore(query: string) {
     const vectorStoreOperations:VectorStoreOperations = new VectorStoreOperations();
     await vectorStoreOperations.loadVectorStore("vectorstore");
 
