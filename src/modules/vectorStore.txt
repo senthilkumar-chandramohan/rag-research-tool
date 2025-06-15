@@ -1,0 +1,66 @@
+import { FaissStore } from "@langchain/community/vectorstores/faiss";
+import { Document } from '@langchain/core/documents';
+import { OpenAIEmbeddings } from '@langchain/openai';
+
+export class VectorStoreOperations {
+    private vectorStore: FaissStore;
+    private embeddings: OpenAIEmbeddings;
+
+    constructor(vectorStore?: FaissStore) {
+        this.embeddings = new OpenAIEmbeddings({
+            openAIApiKey: process.env.OPENAI_API_KEY,
+        });
+        if (vectorStore) {
+            this.vectorStore = vectorStore;
+        }
+    }
+
+    async loadVectorStore(directory: string = "vectorstore"): Promise<void> {
+        try {
+            this.vectorStore = await FaissStore.load(
+                directory,
+                this.embeddings
+            );
+        } catch (error) {
+            console.error('Error loading vector store:', error);
+            throw error;
+        }
+    }
+
+    async similaritySearch(
+        query: string,
+        k: number = 3
+    ): Promise<Document[]> {
+        if (!this.vectorStore) {
+            throw new Error('Vector store not initialized. Please load or create a vector store first.');
+        }
+
+        try {
+            const results = await this.vectorStore.similaritySearch(query, k);
+            return results;
+        } catch (error) {
+            console.error('Error performing similarity search:', error);
+            throw error;
+        }
+    }
+
+    async addDocuments(documents: Document[]): Promise<void> {
+        if (!this.vectorStore) {
+            this.vectorStore = await FaissStore.fromDocuments(
+                documents,
+                this.embeddings
+            );
+        } else {
+            await this.vectorStore.addDocuments(documents);
+        }
+        await this.vectorStore.save("vectorstore");
+    }
+
+    async deleteDocument(documentId: string): Promise<void> {
+        if (!this.vectorStore) {
+            throw new Error('Vector store not initialized');
+        }
+        // Note: FAISS doesn't support direct deletion. This is a placeholder for future implementation
+        throw new Error('Delete operation not supported in FAISS');
+    }
+}

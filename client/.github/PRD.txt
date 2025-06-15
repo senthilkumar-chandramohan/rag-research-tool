@@ -1,0 +1,90 @@
+Product Requirements Document (PRD)
+Product Name
+LLM Assistant UI
+
+Owner
+Product Manager / Frontend Lead Developer
+
+Document Date
+2025-06-10
+
+1. Objective
+Design and develop a web-based frontend application that allows users to:
+
+Submit a URL via a modal form to a backend REST API.
+
+Interact with an LLM (e.g., ChatGPT-like interface) to ask questions and view responses in a conversational UI.
+
+2. Key Features
+2.1 URL Submission Modal
+Description:
+A Call-to-Action (CTA) button on the main page that opens a modal for users to enter a URL and submit it to a backend REST API.
+
+Requirements:
+
+A prominently placed button labeled “Submit URL”.
+
+Clicking the button opens a modal window.
+
+Modal contains:
+
+A single-line text input field for entering a URL.
+
+A “Submit” button.
+
+On submit:
+
+Validate that the input is a valid URL.
+
+Send a POST request using fetch to a REST API endpoint (e.g., POST /api/urls).
+
+Handle and display success or error messages within the modal.
+
+Out of Scope:
+
+Backend endpoint implementation (assume it exists and accepts valid URLs).
+
+2.2 ChatGPT-like LLM Interface
+Description:
+A conversational UI for users to input queries and get AI-generated responses displayed in a chat format.
+
+Requirements:
+
+A vertically scrollable chat window.
+
+Each message (user or AI) shown as a message bubble with proper styling:
+
+User messages right-aligned.
+
+AI responses left-aligned.
+
+An input field fixed at the bottom to type and submit queries.
+
+On submitting a query:
+
+Display user’s message in the chat.
+
+Make a POST request to an LLM endpoint (e.g., POST /api/chat) with the query.
+
+Display the response in the chat once received.
+
+Show loading indicator while waiting for response.
+
+Optional Enhancements (can be phased later):
+
+Store and reload chat history.
+
+Allow multi-turn context.
+
+3. Technical Requirements
+Frontend Framework: React.js (preferred)
+
+Styling: TailwindCSS / CSS Modules
+
+Modal Library: Headless UI / Custom implementation
+
+API Integration: Native fetch or Axios
+
+Validation: Basic URL format validation using Regex or URL constructor
+
+Responsiveness: Fully responsive UI for desktop and mobile

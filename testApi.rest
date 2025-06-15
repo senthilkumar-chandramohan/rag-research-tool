@@ -1,0 +1,16 @@
+# POST http://localhost:3000/ingest
+# Content-Type: application/json
+
+# {
+#     "url": "https://www.team-bhp.com/news/hyundai-developing-new-12l-turbo-petrol-engine-india"
+# }
+
+POST http://localhost:3000/ask
+Content-Type: application/json
+
+{
+    "query": "Which is the best selling car?"
+}
+
+
+# GET http://localhost:3000/

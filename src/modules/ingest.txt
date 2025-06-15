@@ -1,0 +1,80 @@
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { Document } from '@langchain/core/documents';
+import { OpenAIEmbeddings } from '@langchain/openai';
+import { FaissStore } from "@langchain/community/vectorstores/faiss";
+import DocumentLoader from './loader';
+
+class DocumentIngestor {
+    private loader: DocumentLoader;
+    private textSplitter: RecursiveCharacterTextSplitter;
+    private embeddings: OpenAIEmbeddings;
+    
+    constructor(url: string, options: object) {
+        this.loader = new DocumentLoader(url, options);
+        this.textSplitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 1000,
+            chunkOverlap: 200,
+        });
+        this.embeddings = new OpenAIEmbeddings({
+            openAIApiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    
+    async ingestDocuments(): Promise<{ documents: Document[], vectorStore: FaissStore }> {
+        try {
+            // Load documents using the DocumentLoader
+            const rawDocuments = await this.loader.loadDocument();
+
+            // Split documents into chunks
+            const splitDocuments = await this.textSplitter.splitDocuments(rawDocuments);
+
+            // Add metadata about the ingestion process
+            const processedDocuments = splitDocuments.map(doc => {
+                return new Document({
+                    pageContent: doc.pageContent,
+                    metadata: {
+                        ...doc.metadata,
+                        chunk_size: 1000,
+                        chunk_overlap: 200,
+                        ingested_at: new Date().toISOString(),
+                    },
+                });
+            });
+
+            // Create and store vectors
+            const vectorStore = await FaissStore.fromDocuments(
+                processedDocuments,
+                this.embeddings
+            );
+
+            // Save the vector store
+            await vectorStore.save("vectorstore");
+
+            return {
+                documents: processedDocuments,
+                vectorStore
+            };
+        } catch (error) {
+            console.error('Error during document ingestion:', error);
+            throw error;
+        }
+    }
+
+    // Method to get statistics about the ingested documents
+    getIngestStats(documents: Document[]): {
+        documentCount: number;
+        totalChunks: number;
+        averageChunkLength: number;
+    } {
+        const totalChunks = documents.length;
+        const totalLength = documents.reduce((sum, doc) => sum + doc.pageContent.length, 0);
+        
+        return {
+            documentCount: new Set(documents.map(doc => doc.metadata.source)).size,
+            totalChunks,
+            averageChunkLength: totalLength / totalChunks,
+        };
+    }
+}
+
+export default DocumentIngestor;
