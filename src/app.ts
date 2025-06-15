@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 
 // CORS configuration
 const corsOptions = {
-  origin: ['http://localhost:5173','https://rag-research-tool.vercel.app'],
+  origin: ['http://localhost:5173','https://rag-research-tool.vercel.app','https://www.rag-research-tool.vercel.app'],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 };
