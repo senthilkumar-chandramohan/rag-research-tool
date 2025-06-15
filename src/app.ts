@@ -31,7 +31,11 @@ app.get('/', (req: Request, res: Response) => {
 app.post('/ingest', async (req: Request, res: Response) => {
   const { url } = req.body;
   const ingestedDoc = await ingestAndProcessDocuments(url);
-  res.send(ingestedDoc[0].pageContent.toString());
+  if(ingestedDoc && ingestedDoc.length) {
+    res.send(ingestedDoc[0].pageContent.toString());
+  } else {
+    res.send("No document ingested");
+  }
 });
 
 app.post('/ask', async (req: Request, res: Response) => {
