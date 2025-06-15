@@ -12,7 +12,7 @@ export class VectorStoreOperations {
         });
     }
 
-    async addDocuments(documents: Document<Record<string, any>>[]): Promise<void> {
+    async addDocuments(documents:any): Promise<void> {
         if (!this.vectorStore) {
             this.vectorStore = await FaissStore.fromDocuments(
                 documents,
@@ -24,7 +24,7 @@ export class VectorStoreOperations {
         await this.vectorStore.save("vectorstore");
     }
 
-    async searchForSimilarDocuments(query: string, k: number = 3): Promise<Document<Record<string, any>>[]> {
+    async searchForSimilarDocuments(query: string, k: number = 3) {
         return await this.vectorStore.similaritySearch(query, k);
     }
 
