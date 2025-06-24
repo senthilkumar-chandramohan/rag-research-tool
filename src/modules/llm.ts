@@ -23,11 +23,14 @@ export class QueryEngine {
         this.vectorStore = new VectorStoreOperations();
     }
 
-    async query(question: string): Promise<string> {
+    async query(question: string): Promise<object> {
         await this.vectorStore.loadVectorStore();
         
         // Fetch relevant documents from vector store
         const docs = await this.vectorStore.searchForSimilarDocuments(question, 3);
+        
+        // Extract docs[].metadata.source into a separate array named sources
+        const sources = docs.map(doc => doc.metadata.source);
 
         // Create prompt template
         const prompt = ChatPromptTemplate.fromMessages([
@@ -55,6 +58,6 @@ export class QueryEngine {
             docs,
         });
 
-        return response;
+        return {response, sources};
     }
 }

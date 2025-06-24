@@ -4,6 +4,7 @@ import ChatMessageBubble from './ChatMessageBubble';
 interface Message {
   text: string;
   isUser: boolean;
+  sources?: string[];
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -31,7 +32,7 @@ const ChatInterface = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/ask`, {
+      const asyncCallResponse = await fetch(`${API_BASE_URL}/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -39,12 +40,13 @@ const ChatInterface = () => {
         body: JSON.stringify({ query: input })
       });
 
-      if (!response.ok) {
+      if (!asyncCallResponse.ok) {
         throw new Error('Failed to get response');
       }
 
-      const result = await response.text();
-      setMessages(prev => [...prev, { text: result, isUser: false }]);
+      const {response, sources} = await asyncCallResponse.json() as { response: string; sources?: string[] };
+      const uniqueSources = Array.isArray(sources) ? [...new Set(sources)] : [];
+      setMessages(prev => [...prev, { text: response, isUser: false, sources: uniqueSources }]);
     } catch (error) {
       console.error('Error:', error);
       setMessages(prev => [...prev, { 
@@ -66,11 +68,25 @@ const ChatInterface = () => {
           </div>
         ) : (
           messages.map((message, index) => (
-            <ChatMessageBubble
-              key={index}
-              message={message.text}
-              isUser={message.isUser}
-            />
+            <div key={index}>
+              <ChatMessageBubble
+                message={message.text}
+                isUser={message.isUser}
+              />
+              {/* Show sources only for LLM (assistant) messages with sources */}
+              {!message.isUser && message.sources && message.sources.length > 0 && (
+                <div className="ml-8 mb-4 text-xs text-gray-500">
+                  <div className="font-semibold mb-1">References:</div>
+                  <ul className="list-disc list-inside">
+                    {message.sources.map((src, i) => (
+                      <li key={i}>
+                        <a href={src} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{src}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           ))
         )}
         {isLoading && (
